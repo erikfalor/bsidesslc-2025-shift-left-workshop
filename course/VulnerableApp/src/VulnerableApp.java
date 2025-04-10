@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import java.util.Arrays;
+import java.util.List;
 
 public class VulnerableApp extends HttpServlet {
 
@@ -27,8 +29,12 @@ public class VulnerableApp extends HttpServlet {
         // Vulnerability 2: Command Injection
         try {
             String data = request.getParameter("data");
-            // Unsafe command execution
-            Runtime.getRuntime().exec("echo " + data);
+            // Validate the input against a whitelist of allowed commands
+            if (isValidCommand(data)) {
+                Runtime.getRuntime().exec("echo " + data);
+            } else {
+                response.getWriter().println("Invalid command");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,5 +54,11 @@ public class VulnerableApp extends HttpServlet {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Method to validate the user input against a whitelist of allowed commands
+    private boolean isValidCommand(String data) {
+        List<String> allowedCommands = Arrays.asList("hello", "world", "test");
+        return allowedCommands.contains(data);
     }
 }
